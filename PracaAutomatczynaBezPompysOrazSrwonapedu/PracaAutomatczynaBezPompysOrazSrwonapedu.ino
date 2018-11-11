@@ -1,9 +1,6 @@
 #include "DHT.h"
-
 #define DHT11_PIN 3
 DHT dht;
-
-
 #define relay_fan 2
 #define relay_bulb 4
 #define photoresistor A4
@@ -25,9 +22,8 @@ int iA=0;
 float sumA=0;
 float meanA=0;
 unsigned long keptTimeAH=0;
-//zmienne do sterowania wentylatorem
+//zmienne do sterowania serwonapedem
 float ahMin;
-
 
 //zmienne do pomiaru srednigo poziomu oswietlania
 int light_level;
@@ -45,21 +41,16 @@ int iS=0;
 float sumS=0;
 float meanS=0;
 unsigned long keptTimeSoil=0;
-//zmienne do sterowania wentylatorem
+//zmienne do sterowania pompa
 float smMin;
 
 
 unsigned long keptTimePrint=0;//zmienna czasowa do wypisywania informacji 
-
 unsigned long actualTime=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 unsigned long actualTime1=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis() 
 unsigned long actualTime2=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 unsigned long actualTime3=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 unsigned long actualTime4=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
-
-
-
-
 
 void setup() {
   Serial.begin(9600);
@@ -68,8 +59,6 @@ void setup() {
   pinMode(relay_bulb, OUTPUT) ; 
   digitalWrite(relay_bulb, HIGH);
   dht.setup(DHT11_PIN);
-  
-
 }
 
 void loop() {
