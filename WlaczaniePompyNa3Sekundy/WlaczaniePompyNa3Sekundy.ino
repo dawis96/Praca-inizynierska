@@ -13,7 +13,6 @@ void setup() {
 }
 
 void loop() {
-
    if(Serial.available() > 0){
      recivedData = Serial.readStringUntil('\n'); 
    }
