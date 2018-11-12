@@ -1,10 +1,8 @@
 #define relay_pump 7
 String recivedData = "0";
 
-unsigned long keptTimePump1=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
-unsigned long keptTimePump2=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
-unsigned long keptTimePump3=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
-unsigned long actualTime2=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
+unsigned long keptTimePump=0;
+unsigned long actualTimePump=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 int a=0;
 void setup() {
   Serial.begin(9600);
@@ -16,22 +14,24 @@ void loop() {
    if(Serial.available() > 0){
      recivedData = Serial.readStringUntil('\n'); 
    }
-   actualTime2=millis();
+   actualTimePump=millis();
    if (recivedData  == "1") {
-    if (actualTime2 - keptTimePump1 >= 9000UL){
-      digitalWrite(relay_pump, HIGH);
-      //keptTimePump1=actualTime2;
-      Serial.println("1");
-
-      
-    }
-    if (actualTime2 - keptTimePump1 >= 12000UL){
-      digitalWrite(relay_pump, LOW);
-      keptTimePump1=actualTime2;
-      Serial.println("0");
-    }
+     pumpON(9000UL, 12000UL);
   }
   if (recivedData  == "0") {
     digitalWrite(relay_pump, LOW);
   }
+}
+
+void pumpON(unsigned long startTime, unsigned long endTime){
+ actualTimePump=millis();
+ if (actualTimePump - keptTimePump >= startTime){
+      digitalWrite(relay_pump, HIGH);
+      Serial.println("1");
+    }
+    if (actualTimePump - keptTimePump >= endTime){
+      digitalWrite(relay_pump, LOW);
+      keptTimePump=actualTimePump;
+      Serial.println("0");
+    }
 }

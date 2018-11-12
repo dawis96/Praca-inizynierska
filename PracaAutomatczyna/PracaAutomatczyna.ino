@@ -1,10 +1,13 @@
+#include <Servo.h>
 #include "DHT.h"
 #define DHT11_PIN 3
 DHT dht;
-#define relay_fan 2
-#define relay_bulb 4
 #define photoresistor A4
 #define soil_moisture_sensor A0
+#define relay_fan 2
+#define relay_bulb 4
+#define relay_pump 7
+Servo servomotor;
 
 //zmienne do pomiaru sredniej temperatury
 int temperature;
@@ -23,7 +26,7 @@ float sumA=0;
 float meanA=0;
 unsigned long keptTimeAH=0;
 //zmienne do sterowania serwonapedem
-float ahMin;
+float ahMin=90;
 
 //zmienne do pomiaru srednigo poziomu oswietlania
 int light_level;
@@ -42,7 +45,7 @@ float sumS=0;
 float meanS=0;
 unsigned long keptTimeSoil=0;
 //zmienne do sterowania pompa
-float smMin;
+float smMin=10.0;
 
 
 unsigned long keptTimePrint=0;//zmienna czasowa do wypisywania informacji 
@@ -51,6 +54,12 @@ unsigned long actualTime1=0;//zmienna czasowa do zapisywania aktualnczego czasu 
 unsigned long actualTime2=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 unsigned long actualTime3=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
 unsigned long actualTime4=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
+unsigned long keptTimePump=0;
+unsigned long actualTimePump=0;
+unsigned long keptTimeP=0;
+unsigned long keptTimeServo=0;
+unsigned long actualTimeServo=0;
+
 
 void setup() {
   Serial.begin(9600);
@@ -58,7 +67,10 @@ void setup() {
   digitalWrite(relay_fan, HIGH);
   pinMode(relay_bulb, OUTPUT) ; 
   digitalWrite(relay_bulb, HIGH);
+  pinMode(relay_pump, OUTPUT) ; 
+  digitalWrite(relay_pump, LOW); //narazie LOW, po podlaczeniu przekaznika zmienić na HIGH
   dht.setup(DHT11_PIN);
+  servomotor.attach(9);
 }
 
 void loop() {
@@ -91,11 +103,22 @@ void loop() {
     }
     Serial.print(",AH:");
     Serial.print(meanA);
-    //Wypisywanie stanu z serwa
+    Serial.print(",S:");
+     if (meanA<ahMin){
+      Serial.print("1");
+     }
+     else{
+      Serial.print("0");
+     }
     Serial.print(",SM:");
-    Serial.println(meanS);
-    //wypisywanie stanu pompy
-    
+    Serial.print(meanS);
+    Serial.print(",P:");
+      if (digitalRead(relay_pump)==HIGH) {
+      Serial.println("1");
+    }
+    else {
+      Serial.println("0");
+    }
     keptTimePrint= actualTime;
   }  
 
@@ -115,9 +138,22 @@ void loop() {
     digitalWrite(relay_bulb, LOW);
   }
 
-  //Sterowanie serwem
+  //Sterowanie serwonapedem
+  if (meanA<ahMin){
+    servoMove(2000UL, 12000UL);
+  }
+  else{
+     servomotor.write(0);
+  }
 
-  //Sterowanie pompa
+  //Sterowanie pompy
+  if (meanS<smMin) {
+    
+     pumpON(9000UL, 12000UL);
+  }
+  else{
+    digitalWrite(relay_pump, LOW);
+  }
   
 }
 
@@ -207,4 +243,27 @@ float average_soil_moisture(){
      }
   }
   return meanS;
+}
+
+void pumpON(unsigned long startTime, unsigned long endTime){
+ actualTimePump=millis();
+ if (actualTimePump - keptTimePump >= startTime){
+      digitalWrite(relay_pump, HIGH);
+    }
+    if (actualTimePump - keptTimePump >= endTime){
+      digitalWrite(relay_pump, LOW);
+      keptTimePump=actualTimePump;
+    }
+}
+
+void servoMove(unsigned long startTime, unsigned long endTime){
+  actualTimeServo=millis();
+  if (actualTimeServo - keptTimeServo >= startTime){
+      servomotor.write(0);
+    }
+    if (actualTimeServo - keptTimeServo >= endTime){
+      servomotor.write(120);
+      keptTimeServo=actualTimeServo;
+      Serial.println("Move");
+    }
 }
