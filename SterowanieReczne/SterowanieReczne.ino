@@ -15,9 +15,6 @@ int iT=0;
 float sumT=0;
 float meanT=0;
 unsigned long keptTimeTemp=0;
-//zmienne do sterowania wentylatorem
-float FanOnTemp=23.0;
-float FanOffTemp=22.5;
 
 //zmienne do pomiaru sredniej wilgotnosci powietrza
 int air_humidity;
@@ -25,8 +22,6 @@ int iA=0;
 float sumA=0;
 float meanA=0;
 unsigned long keptTimeAH=0;
-//zmienne do sterowania serwonapedem
-float ahMin=90;
 
 //zmienne do pomiaru srednigo poziomu oswietlania
 int light_level;
@@ -34,9 +29,6 @@ int iL=0;
 float sumL=0;
 float meanL=0;
 unsigned long keptTimeLight=140;
-//zmienne do sterowania swiatlem
-int lightMin=5;
-int lightMax=40;
 
 //zmienne do pomiaru sredniej wilgotnosci gleby
 int soil_moisture;
@@ -44,9 +36,6 @@ int iS=0;
 float sumS=0;
 float meanS=0;
 unsigned long keptTimeSoil=0;
-//zmienne do sterowania pompa
-float smMin=10.0;
-
 
 unsigned long keptTimePrint=0;//zmienna czasowa do wypisywania informacji 
 unsigned long actualTime=0;//zmienna czasowa do zapisywania aktualnczego czasu funkcja millis()
@@ -60,6 +49,7 @@ unsigned long keptTimeP=0;
 unsigned long keptTimeServo=0;
 unsigned long actualTimeServo=0;
 
+String recivedData; //Zmienna do sterowania recznego
 
 void setup() {
   Serial.begin(9600);
@@ -80,6 +70,17 @@ void loop() {
   meanL = average_light_level();
   meanA = average_air_humidity();
   meanS = average_soil_moisture();
+
+  //Odczytywanie danych do sterowania recznego
+  if(Serial.available() > 0){
+     recivedData = Serial.readStringUntil('\n'); 
+   }
+  String mode = getValue(recivedData,';',0); //trybreczny-1, automatczyny-0
+  String manualLight= getValue(recivedData,';',1); //1-zarowka wlaczona 0- zarowka wylaczona
+  String manualFan = getValue(recivedData,';',2); 
+  String manualPump = getValue(recivedData,';',3);
+  String manualServo = getValue(recivedData,';',4);
+  
 
   //Wypisywanie danych
   if (actualTime - keptTimePrint >= 11000UL){
@@ -104,7 +105,7 @@ void loop() {
     Serial.print(",AH:");
     Serial.print(meanA);
     Serial.print(",S:");
-     if (meanA<ahMin){
+     if (manualServo=="1"){
       Serial.print("1");
      }
      else{
@@ -123,23 +124,23 @@ void loop() {
   }  
 
   //Sterowanie wentylatorem
-  if (meanT>=FanOnTemp) {
+  if (manualFan=="1") {
     digitalWrite(relay_fan, LOW);  
   }
-  else if(meanT<=FanOffTemp) {
+  else {
     digitalWrite(relay_fan, HIGH);
   }
 
   //Sterowanie swiatlem
-  if ((meanL<lightMin)||(meanL>lightMax)){
-    digitalWrite(relay_bulb, HIGH);
+  if (manualLight == "1"){
+    digitalWrite(relay_bulb, LOW);
   }
   else {
-    digitalWrite(relay_bulb, LOW);
+    digitalWrite(relay_bulb, HIGH);
   }
 
   //Sterowanie serwonapedem
-  if (meanA<ahMin){
+  if (manualServo=="1"){
     servoMove(2000UL, 12000UL);
   }
   else{
@@ -147,7 +148,7 @@ void loop() {
   }
 
   //Sterowanie pompy
-  if (meanS<smMin) {
+  if (manualPump=="1") {
     
      pumpON(9000UL, 12000UL);
   }
@@ -266,4 +267,21 @@ void servoMove(unsigned long startTime, unsigned long endTime){
       keptTimeServo=actualTimeServo;
       //Serial.println("Move");
     }
+}
+
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length()-1;
+
+  for(int i=0; i<=maxIndex && found<=index; i++){
+    if(data.charAt(i)==separator || i==maxIndex){
+        found++;
+        strIndex[0] = strIndex[1]+1;
+        strIndex[1] = (i == maxIndex) ? i+1 : i;
+    }
+  }
+
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
