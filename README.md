@@ -1,2 +1,2 @@
 # Praca-inizynierska
-Robot do uprawy drzewka bonsai
+System automatyzacji uprawy drzewka bonsai
