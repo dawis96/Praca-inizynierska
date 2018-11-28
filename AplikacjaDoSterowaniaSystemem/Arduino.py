@@ -1,6 +1,8 @@
 import serial #biblioteka do komunikacji z portem szeregowym
 import time
 
+global arduinoSerialData
+
 def connect(comNumber):
     """Funckja do polaczenia się aplikacji z Arduino"""
     global arduinoSerialData
