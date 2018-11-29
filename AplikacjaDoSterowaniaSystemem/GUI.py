@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
 from tkinter import * #importowanie biblioteki do tworzenia Gui
 from tkinter import messagebox
 import Arduino
 import serial
 import time
+import analizaDanych
 
 
 class Gui:
@@ -14,18 +16,19 @@ class Gui:
         frame.grid()
 
         #Laczenie z Arduino
-        self.label1 = Label(frame, text='Laczenie z Arduino:')
+        self.label1 = Label(frame, text='Łączenie z Arduino:')
         self.label2 = Label(frame, text='COM nr:')
         self.entryNrCOM = Entry(frame)
-        self.button_connect = Button(frame, text='Polacz', width=15, command=self.connect)
+        self.button_connect = Button(frame, text='Polącz', width=19, command=self.connect)
 
         #Odczyty z czujnikow
         self.labelEmpty1 = Label(frame, text='')
-        self.label3 = Label(frame, text='Odczyty z czujnikow:')
+        self.label3 = Label(frame, text='Odczyty z czujników:')
         self.labelTemperature = Label(frame, text='Temperatura:')
-        self.labelLightLevel = Label(frame, text='Poziom naslonecznienia:')
-        self.labelAirHumidity = Label(frame, text='Wilgotnosc Powietrza:')
-        self.labelSoilMoisture = Label(frame, text='Wilgotnosc gleby:')
+        self.labelLightLevel = Label(frame, text='Poziom nasłonecznienia:')
+        self.labelAirHumidity = Label(frame, text='Wilgotność powietrza:')
+        self.labelSoilMoisture = Label(frame, text='Wilgotność gleby:')
+
         #zmienne to ustawiania odczytow z arduino jako tekst w polach entry
         self.textTemperature = StringVar()
         self.textLightLevel = StringVar()
@@ -43,11 +46,31 @@ class Gui:
         self.label4 = Label(frame, text='Sterowanie:')
         self.radioManual = Radiobutton(frame, text='Manualne', value=2, state=DISABLED, command=self.manualMode)
         self.radioAutomatic = Radiobutton(frame, text='Automatyczne', value=1, state=DISABLED, command=self.automaticMode)
-        self.button_bulb = Button(frame, text='Wlacz zarowke', width=15, state=DISABLED, command=self.bulbOnOff)
-        self.button_fan = Button(frame, text='Wlacz wiatrak', width=15, state=DISABLED, command=self.fanOnOff)
-        self.button_pump = Button(frame, text='Podlej', width=15, state=DISABLED, command=self.water)
-        self.button_servo = Button(frame, text='Zwilz', width=15, state=DISABLED, command=self.spray)
+        self.button_bulb = Button(frame, text='Włącz żarówkę', width=19, state=DISABLED, command=self.bulbOnOff)
+        self.button_fan = Button(frame, text='Włącz wiatrak', width=19, state=DISABLED, command=self.fanOnOff)
+        self.button_pump = Button(frame, text='Podlej', width=19, state=DISABLED, command=self.water)
+        self.button_servo = Button(frame, text='Zwilż', width=19, state=DISABLED, command=self.spray)
         self.labelEmpty3 = Label(frame, text='')
+
+        # Analiza danych
+        self.textTime = StringVar()
+        self.textDataCount = StringVar()
+
+        self.label5 = Label(frame, text='Analiza danych: (trwaja prace nad tym modulem)')
+        self.label6 = Label(frame, text='Zapisywanie danych od:')
+        self.entryTime = Entry(frame, state='readonly', textvariable=self.textTime)
+        self.Label7 = Label(frame, text='Liczba wpisów:')
+        self.entryDataCount = Entry(frame, state='readonly', textvariable=self.textDataCount)
+        self.Label8 = Label(frame, text='Stwórz:')
+        self.button_1hourplot = Button(frame, text='Wykres z ostatniej godziny', width=19, state=DISABLED, command=self.plot1hour)
+        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19,  command=self.plotAll)
+        self.button_excel = Button(frame, text='Plik excel', width=19, state=DISABLED)
+        self.button_csv = Button(frame, text='plik csv', width=19, state=DISABLED)
+        self.labelEmpty4 = Label(frame, text='')
+
+        #Wyjscie, informacje
+        self.button_info = Button(frame, text='Info', width=40, state=DISABLED)
+        self.button_quit = Button(frame, text='Wyjście', width=40, state=DISABLED)
 
         # Ustawienie wszystkiego w siatce interfejsu
         self.label1.grid(row=0, columnspan=2, sticky=W)
@@ -76,19 +99,38 @@ class Gui:
         self.button_servo.grid(row=8, column=2)
         self.labelEmpty3.grid(row=9)
 
+        self.label5.grid(row=10, columnspan=2, sticky=W)
+        self.label6.grid(row=11, sticky=E)
+        self.entryTime.grid(row=11, column=1)
+        self.Label7.grid(row=11, column=2, sticky=E)
+        self.entryDataCount.grid(row=11, column=3)
+        self.Label8.grid(row=12, column=1, columnspan=2)
+        self.button_1hourplot.grid(row=13, column=0)
+        self.button_plot.grid(row=13, column=1)
+        self.button_excel.grid(row=13, column=2)
+        self.button_csv.grid(row=13, column=3)
+        self.labelEmpty4.grid(row=14)
+
+        self.button_info.grid(row=15, column=0, columnspan=2)
+        self.button_quit.grid(row=15, column=2, columnspan=2)
+
     def connect(self):
         """funnkcja sluzaca do polaczenia sie aplikacji z arduino"""
         comNumber = str(self.entryNrCOM.get())
         try:
             Arduino.connect(comNumber)
-            self.button_connect['text'] = 'Polaczono'
+            self.button_connect['text'] = 'Polączono'
             self.button_connect.config(state=DISABLED)
             self.entryNrCOM.config(state='readonly')
             self.radioAutomatic.config(state=NORMAL)
             self.radioManual.config(state=NORMAL)
+            self.button_1hourplot.config(state=NORMAL)
+            self.button_plot.config(state=NORMAL)
+            self.button_excel.config(state=NORMAL)
+            self.button_csv.config(state=NORMAL)
 
         except serial.serialutil.SerialException:
-            messagebox.showerror("Error", "Nieprawidlowy numer COM")
+            messagebox.showerror("Error", "Nieprawidłowy numer COM")
 
     def arduinoWrite(self):
         """Wysyłąnie zmiennych do arduino"""
@@ -103,6 +145,7 @@ class Gui:
         self.button_pump.config(state=NORMAL)
         self.button_servo.config(state=NORMAL)
         self.controlVariable[0] = '1'
+        self.arduinoWrite()
 
     def automaticMode(self):
         """wlaczanie trybu automatycznego"""
@@ -110,10 +153,9 @@ class Gui:
         self.button_fan.config(state=DISABLED)
         self.button_pump.config(state=DISABLED)
         self.button_servo.config(state=DISABLED)
-        self.controlVariable = ['1', '0', '0', '0', '0']
-        controlWrite = self.controlVariable[0] + ';' + self.controlVariable[1] + ';' + self.controlVariable[2] + ';' + \
-                       self.controlVariable[3] + ';' + self.controlVariable[4]
-        Arduino.arduinoSerialData.write(controlWrite.encode())
+        #self.controlVariable = ['1', '0', '0', '0', '0']
+        #self.arduinoWrite()
+        #time.sleep(0.5)
         self.controlVariable = ['0', '0', '0', '0', '0']
         self.arduinoWrite()
 
@@ -122,23 +164,22 @@ class Gui:
         if self.controlVariable[1] == '0':
             self.controlVariable[1]='1'
             self.arduinoWrite()
-            self.button_fan['text']='Wylacz wiatrak'
+            self.button_fan['text']='Wyłącz wiatrak'
         elif self.controlVariable[1] == '1':
             self.controlVariable[1]='0'
             self.arduinoWrite()
-            self.button_fan['text']='Wlacz wiatrak'
+            self.button_fan['text']='Włącz wiatrak'
 
     def bulbOnOff(self):
         """Sterowanie zarowka z przycisku"""
         if self.controlVariable[2] == '0':
             self.controlVariable[2] = '1'
             self.arduinoWrite()
-            self.button_bulb['text'] = 'Wylacz zarowke'
+            self.button_bulb['text'] = 'Wyłącz żarówkę'
         elif self.controlVariable[2] == '1':
             self.controlVariable[2] = '0'
             self.arduinoWrite()
-            self.button_bulb['text'] = 'Wlacz zarowke'
-
+            self.button_bulb['text'] = 'Włącz żarówkę'
     def spray(self):
         """Uruchomienie serwonapedu przyciskiem"""
         self.controlVariable[4] = '1'
@@ -155,6 +196,13 @@ class Gui:
         self.controlVariable[3] = '0'
         self.arduinoWrite()
 
+    def plotAll(self):
+            analizaDanych.plotSubplot(2)
+    def plot1hour(self):
+            if len(Arduino.airHumidityArray) < 62:
+                messagebox.showwarning("Error", "Niewystarczająca ilość zebranych danych")
+            else:
+                analizaDanych.plotSubplot(-60)
 
 
 
