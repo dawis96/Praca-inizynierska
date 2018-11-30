@@ -40,7 +40,7 @@ def getData():
     while connected == 1: #Jesli jestesmy polaczeni z arduino
         if arduinoSerialData.inWaiting() > 0:
             data = str(arduinoSerialData.readline())
-            actualTime= strftime("%Y-%m-%d_%H:%M:%S", gmtime())
+            actualTime= strftime("%Y-%m-%d %H:%M:%S", gmtime())
             arrayData = data.split(',')
             temperature = arrayData[0][4:]
             fanCondition = arrayData[1][2]

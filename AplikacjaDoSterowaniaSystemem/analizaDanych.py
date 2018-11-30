@@ -43,7 +43,7 @@ def dataframe(type):
     df = pd.DataFrame.from_dict(frame)
 
     if type == 'xlsx':
-        writer = pd.ExcelWriter('bonsai.'+str(type))
+        writer = pd.ExcelWriter('bonsai'+Arduino.timeArray[2][:10]+'.'+str(type))
         df.to_excel(writer, 'Sheet1')
         writer.save()
 
