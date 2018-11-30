@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import Arduino
+import pandas as pd
+
 
 def plotSubplot(a):
 
@@ -25,3 +27,25 @@ def plotSubplot(a):
     plt.xlabel('nr pomiaru')
     plt.ylabel('%')
     plt.show()
+
+def dataframe(type):
+    frame={'Czas': Arduino.timeArray[2:],
+           'Temperatura': Arduino.temperatureArray[2:],
+           'Naslonecznienie': Arduino.lightLevelArray[2:],
+           'Wilgotnosc powietrza': Arduino.airHumidityArray[2:],
+           'Wilgotnosc gleby': Arduino.soilMoistureArray[2:],
+           'Wiatrak': Arduino.fanConditionArray[2:],
+           'Zarowka': Arduino.bulbConditionArray[2:],
+           'Serwonapęd': Arduino.servoConditionArray[2:],
+           'Pompa': Arduino.pumpConditionArray[2:],
+           'Tryb': Arduino.modeConditionArray[2:]
+           }
+    df = pd.DataFrame.from_dict(frame)
+
+    if type == 'xlsx':
+        writer = pd.ExcelWriter('bonsai.'+str(type))
+        df.to_excel(writer, 'Sheet1')
+        writer.save()
+
+    if type == 'csv':
+        df.to_csv('bonsai.'+str(type))

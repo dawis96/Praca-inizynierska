@@ -61,11 +61,11 @@ class Gui:
         self.entryTime = Entry(frame, state='readonly', textvariable=self.textTime)
         self.Label7 = Label(frame, text='Liczba wpisów:')
         self.entryDataCount = Entry(frame, state='readonly', textvariable=self.textDataCount)
-        self.Label8 = Label(frame, text='Stwórz:')
+        self.Label8 = Label(frame, text='Wygeneruj:')
         self.button_1hourplot = Button(frame, text='Wykres z ostatniej godziny', width=19, state=DISABLED, command=self.plot1hour)
-        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19,  command=self.plotAll)
-        self.button_excel = Button(frame, text='Plik excel', width=19, state=DISABLED)
-        self.button_csv = Button(frame, text='plik csv', width=19, state=DISABLED)
+        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19, command=lambda: analizaDanych.plotSubplot(2))
+        self.button_excel = Button(frame, text='Plik Excel', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('xlsx'))
+        self.button_csv = Button(frame, text='plik csv', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('csv'))
         self.labelEmpty4 = Label(frame, text='')
 
         #Wyjscie, informacje
@@ -156,7 +156,7 @@ class Gui:
         #self.controlVariable = ['1', '0', '0', '0', '0']
         #self.arduinoWrite()
         #time.sleep(0.5)
-        self.controlVariable = ['0', '0', '0', '0', '0']
+        self.controlVariable[0] = '0'
         self.arduinoWrite()
 
     def fanOnOff(self):
@@ -196,8 +196,6 @@ class Gui:
         self.controlVariable[3] = '0'
         self.arduinoWrite()
 
-    def plotAll(self):
-            analizaDanych.plotSubplot(2)
     def plot1hour(self):
             if len(Arduino.airHumidityArray) < 62:
                 messagebox.showwarning("Error", "Niewystarczająca ilość zebranych danych")

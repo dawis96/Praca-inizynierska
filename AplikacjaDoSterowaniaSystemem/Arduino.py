@@ -3,7 +3,6 @@ import time
 from time import gmtime, strftime
 import matplotlib.pyplot as plt
 
-
 global arduinoSerialData
 global timeArray, temperatureArray, fanConditionArray, lightLevelArray, bulbConditionArray, \
                 airHumidityArray, servoConditionArray, soilMoistureArray, pumpConditionArray, modeConditionArray
@@ -28,8 +27,10 @@ def connect(comNumber):
     connected = 1 #zmienna rozpoczynajaca odbieranie danych w funkci getData()
     print('polaczono') #tekst pomocniczy w konsoli
 
+
 def plotSubplot():
     plt.plot(lightLevelArray, 'r-')
+
 
 def getData():
     """Odczytywanie danych z arduino i podzielenie ich na poszczegolne zmienne"""
@@ -39,7 +40,7 @@ def getData():
     while connected == 1: #Jesli jestesmy polaczeni z arduino
         if arduinoSerialData.inWaiting() > 0:
             data = str(arduinoSerialData.readline())
-            actualTime= strftime("%Y-%m-%d %H:%M:%S", gmtime())
+            actualTime= strftime("%Y-%m-%d_%H:%M:%S", gmtime())
             arrayData = data.split(',')
             temperature = arrayData[0][4:]
             fanCondition = arrayData[1][2]
@@ -67,12 +68,6 @@ def getData():
             # print(timeArray)
             # print(modeConditionArray)
             # print(airHumidityArray)
-
-
-
-
-
-
             #print('temperature: '+temperature+', lightLevel; '+lightLevel+', airHumidity: '+airHumidity+', soilMoisture: '+soilMoisture)
             return temperature, lightLevel, airHumidity, soilMoisture, timeArray, temperatureArray, fanConditionArray, lightLevelArray, \
                 bulbConditionArray, airHumidityArray, servoConditionArray, soilMoistureArray, pumpConditionArray, \
