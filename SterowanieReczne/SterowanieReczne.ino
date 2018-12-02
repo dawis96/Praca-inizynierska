@@ -50,6 +50,8 @@ unsigned long keptTimeServo=0;
 unsigned long actualTimeServo=0;
 
 String recivedData; //Zmienna do sterowania recznego
+int writeServo, writePump; //zmienne do wysylania stanu serwa i pompy
+String mode;
 
 void setup() {
   Serial.begin(9600);
@@ -61,6 +63,8 @@ void setup() {
   digitalWrite(relay_pump, LOW); //narazie LOW, po podlaczeniu przekaznika zmienić na HIGH
   dht.setup(DHT11_PIN);
   servomotor.attach(9);
+  servomotor.write(0);
+  mode = "0";
 }
 
 void loop() {
@@ -75,7 +79,7 @@ void loop() {
   if(Serial.available() > 0){
      recivedData = Serial.readStringUntil('\n'); 
    }
-  String mode = getValue(recivedData,';',0); //trybreczny-1, automatczyny-0
+  mode = getValue(recivedData,';',0); //trybreczny-1, automatczyny-0
   String manualLight= getValue(recivedData,';',1); //1-zarowka wlaczona 0- zarowka wylaczona
   String manualFan = getValue(recivedData,';',2); 
   String manualPump = getValue(recivedData,';',3);
@@ -105,8 +109,9 @@ void loop() {
     Serial.print(",AH:");
     Serial.print(meanA);
     Serial.print(",S:");
-     if (manualServo=="1"){
+     if (writeServo == 1){
       Serial.print("1");
+      writeServo = 0;
      }
      else{
       Serial.print("0");
@@ -114,46 +119,59 @@ void loop() {
     Serial.print(",SM:");
     Serial.print(meanS);
     Serial.print(",P:");
-      if (digitalRead(relay_pump)==HIGH) {
-      Serial.println("1");
+    if (writePump == 1) {
+      Serial.print("1");
+      writePump = 0;
     }
     else {
-      Serial.println("0");
+      Serial.print("0");
+    }
+    Serial.print(",M:");
+    if (mode=="1") {
+      Serial.println("M");
+    }
+    else {
+      Serial.println("A");
     }
     keptTimePrint= actualTime;
   }  
 
-  //Sterowanie wentylatorem
-  if (manualFan=="1") {
-    digitalWrite(relay_fan, LOW);  
-  }
-  else {
-    digitalWrite(relay_fan, HIGH);
-  }
+  //Sterowanie manualne:
+  if (mode=="1") {
 
-  //Sterowanie swiatlem
-  if (manualLight == "1"){
-    digitalWrite(relay_bulb, LOW);
-  }
-  else {
+    //Sterowanie wentylatorem
+    if (manualFan=="1") {
+      digitalWrite(relay_fan, LOW);  
+    }
+    else {
+      digitalWrite(relay_fan, HIGH);
+    }
+
+    //Sterowanie swiatlem
+    if (manualLight == "1"){
+      digitalWrite(relay_bulb, LOW);
+    }
+    else {
     digitalWrite(relay_bulb, HIGH);
-  }
+    }
 
-  //Sterowanie serwonapedem
-  if (manualServo=="1"){
-    servoMove(2000UL, 12000UL);
-  }
-  else{
-     servomotor.write(0);
-  }
+    //Sterowanie serwonapedem
+    if (manualServo=="1"){
+      servoMove(1000UL, 2000UL);
+      writeServo = 1;
+    }
+    else{
+      servomotor.write(0);
+    }
 
-  //Sterowanie pompy
-  if (manualPump=="1") {
-    
-     pumpON(9000UL, 12000UL);
-  }
-  else{
-    digitalWrite(relay_pump, LOW);
+    //Sterowanie pompy
+    if (manualPump=="1") {
+      pumpON(500UL, 4500UL);
+      writePump = 1;
+    }
+    else{
+      digitalWrite(relay_pump, LOW);
+    }
   }
   
 }
@@ -265,6 +283,7 @@ void servoMove(unsigned long startTime, unsigned long endTime){
     if (actualTimeServo - keptTimeServo >= endTime){
       servomotor.write(120);
       keptTimeServo=actualTimeServo;
+      
       //Serial.println("Move");
     }
 }

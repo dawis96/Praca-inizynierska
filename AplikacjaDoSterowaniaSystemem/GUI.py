@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from tkinter import * #importowanie biblioteki do tworzenia Gui
 from tkinter import messagebox
-import Arduino
+import arduino
 import serial
 import time
 import analizaDanych
@@ -14,6 +14,7 @@ class Gui:
         """Interfejs Aplikacji"""
         frame = Frame(master)
         frame.grid()
+
 
         #Laczenie z Arduino
         self.label1 = Label(frame, text='Łączenie z Arduino:')
@@ -63,13 +64,13 @@ class Gui:
         self.entryDataCount = Entry(frame, state='readonly', textvariable=self.textDataCount)
         self.Label8 = Label(frame, text='Wygeneruj:')
         self.button_1hourplot = Button(frame, text='Wykres z ostatniej godziny', width=19, state=DISABLED, command=self.plot1hour)
-        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19, command=lambda: analizaDanych.plotSubplot(2))
+        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19, state=DISABLED, command=lambda: analizaDanych.plotSubplot(2))
         self.button_excel = Button(frame, text='Plik Excel', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('xlsx'))
         self.button_csv = Button(frame, text='plik csv', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('csv'))
         self.labelEmpty4 = Label(frame, text='')
 
         #Wyjscie, informacje
-        self.button_info = Button(frame, text='Info', width=40, state=DISABLED)
+        self.button_info = Button(frame, text='Info', width=40, command= self.info)
         self.button_quit = Button(frame, text='Wyjście', width=40, state=DISABLED)
 
         # Ustawienie wszystkiego w siatce interfejsu
@@ -118,7 +119,7 @@ class Gui:
         """funnkcja sluzaca do polaczenia sie aplikacji z arduino"""
         comNumber = str(self.entryNrCOM.get())
         try:
-            Arduino.connect(comNumber)
+            arduino.connect(comNumber)
             self.button_connect['text'] = 'Polączono'
             self.button_connect.config(state=DISABLED)
             self.entryNrCOM.config(state='readonly')
@@ -136,7 +137,7 @@ class Gui:
         """Wysyłąnie zmiennych do arduino"""
         controlWrite = self.controlVariable[0] + ';' + self.controlVariable[1] + ';' + self.controlVariable[2] + ';' + \
                        self.controlVariable[3] + ';' + self.controlVariable[4]
-        Arduino.arduinoSerialData.write(controlWrite.encode())
+        arduino.arduinoSerialData.write(controlWrite.encode())
 
     def manualMode(self):
         """Włacznie trybu manualnego"""
@@ -197,10 +198,12 @@ class Gui:
         self.arduinoWrite()
 
     def plot1hour(self):
-            if len(Arduino.airHumidityArray) < 62:
+            if len(arduino.airHumidityArray) < 62:
                 messagebox.showwarning("Error", "Niewystarczająca ilość zebranych danych")
             else:
                 analizaDanych.plotSubplot(-60)
+    def info(self):
+        messagebox.showinfo("Informacje", "Część pracy inżynierskiej pt. 'System automatyzacji uprawy drzewka bonsai'. Aplikacja służy do zarządzania oraz sterowania systemem a także do zbierania danych. Wykonał Damian Grzywna.")
 
 
 

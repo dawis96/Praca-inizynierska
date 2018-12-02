@@ -1,24 +1,26 @@
 from tkinter import *
 import threading
-import Arduino
-import GUI
+import arduino
+import gui
 import time
 
-Arduino.connected = 0
+arduino.connected = 0
 
 
-def gui():
+def interfejs():
     global b
     root = Tk()
-    b = GUI.Gui(root)
-    root.mainloop()
 
+    b = gui.Gui(root)
+    root.title('bonsai.py')
+    root.iconbitmap(r'bonsai.ico') #Designed by Freepik from www.flaticon.com
+    root.mainloop()
 
 def data():
     global b
     while True:
         try:
-            dane = Arduino.getData()
+            dane = arduino.getData()
             b.textTemperature.set(dane[0]+'°C')
             b.textLightLevel.set(dane[1]+'%')
             b.textAirHumidity.set(dane[2]+'%')
@@ -35,7 +37,7 @@ def data():
             time.sleep(5)
 
 
-t1 = threading.Thread(target=gui)
+t1 = threading.Thread(target=interfejs)
 t2 = threading.Thread(target=data)
 
 t1.start()
