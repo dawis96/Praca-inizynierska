@@ -1,46 +1,40 @@
 import serial #biblioteka do komunikacji z portem szeregowym
-import time
-from time import gmtime, strftime
-import matplotlib.pyplot as plt
+import time #bibliotek do zarzadzania czasem
+from time import strftime, localtime #bibliotek do pobierania aktualnego czasu
 
-global arduinoSerialData
-global timeArray, temperatureArray, fanConditionArray, lightLevelArray, bulbConditionArray, \
+global arduinoSerialData, timeArray, temperatureArray, fanConditionArray, lightLevelArray, bulbConditionArray, \
                 airHumidityArray, servoConditionArray, soilMoistureArray, pumpConditionArray, modeConditionArray
 timeArray = []
-temperatureArray =[]
-fanConditionArray =[]
-lightLevelArray =[]
-bulbConditionArray=[]
-airHumidityArray =[]
-servoConditionArray =[]
-soilMoistureArray =[]
-pumpConditionArray =[]
-modeConditionArray =[]
+temperatureArray = []
+fanConditionArray = []
+lightLevelArray = []
+bulbConditionArray= []
+airHumidityArray = []
+servoConditionArray = []
+soilMoistureArray = []
+pumpConditionArray = []
+modeConditionArray = []
 
 
 def connect(comNumber):
     """Funckja do polaczenia się aplikacji z Arduino"""
-    global arduinoSerialData
-    global connected
+    global arduinoSerialData, connected
     com = 'com'+comNumber
     arduinoSerialData = serial.Serial(com, 9600)
     connected = 1 #zmienna rozpoczynajaca odbieranie danych w funkci getData()
-    print('polaczono') #tekst pomocniczy w konsoli
-
-
-def plotSubplot():
-    plt.plot(lightLevelArray, 'r-')
+    #print('polaczono') #pomocniczy komunikat
 
 
 def getData():
-    """Odczytywanie danych z arduino i podzielenie ich na poszczegolne zmienne"""
+    """Odczytywanie wiersza przychodzacego z arduino i podzielenie ich na poszczegolne zmienne oraz zapisywanie odczytow
+        do list"""
     global connected
     global arduinoSerialData
 
     while connected == 1: #Jesli jestesmy polaczeni z arduino
         if arduinoSerialData.inWaiting() > 0:
             data = str(arduinoSerialData.readline())
-            actualTime= strftime("%Y-%m-%d %H:%M:%S", gmtime())
+            actualTime= strftime("%Y-%m-%d %H:%M:%S", localtime())
             arrayData = data.split(',')
             temperature = arrayData[0][4:]
             fanCondition = arrayData[1][2]
@@ -65,21 +59,7 @@ def getData():
             soilMoistureArray.append(float(soilMoisture))
             pumpConditionArray.append(int(pumpCondition))
             modeConditionArray.append(modeCondition)
-            # print(timeArray)
-            # print(modeConditionArray)
-            # print(airHumidityArray)
-            #print('temperature: '+temperature+', lightLevel; '+lightLevel+', airHumidity: '+airHumidity+', soilMoisture: '+soilMoisture)
+
             return temperature, lightLevel, airHumidity, soilMoisture, timeArray, temperatureArray, fanConditionArray, lightLevelArray, \
                 bulbConditionArray, airHumidityArray, servoConditionArray, soilMoistureArray, pumpConditionArray, \
                 modeConditionArray
-
-        time.sleep(1)
-
-
-
-
-
-
-
-
-

@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 from tkinter import * #importowanie biblioteki do tworzenia Gui
-from tkinter import messagebox
-import arduino
+from tkinter import messagebox, ttk
 import serial
 import time
-import analizaDanych
+import sys
 
+import arduino
+import analizaDanych
 
 class Gui:
     controlVariable = ['0', '0', '0', '0', '0']
@@ -15,12 +16,11 @@ class Gui:
         frame = Frame(master)
         frame.grid()
 
-
         #Laczenie z Arduino
         self.label1 = Label(frame, text='Łączenie z Arduino:')
         self.label2 = Label(frame, text='COM nr:')
-        self.entryNrCOM = Entry(frame)
-        self.button_connect = Button(frame, text='Polącz', width=19, command=self.connect)
+        self.entryNrCOM = ttk.Entry(frame)
+        self.button_connect = ttk.Button(frame, text='Polącz', width=22, command=self.connect)
 
         #Odczyty z czujnikow
         self.labelEmpty1 = Label(frame, text='')
@@ -36,42 +36,48 @@ class Gui:
         self.textAirHumidity = StringVar()
         self.textSoilMoisture = StringVar()
 
-        self.entryTemperature = Entry(frame, state='readonly', textvariable=self.textTemperature)
-        self.entryLightLevel = Entry(frame, state='readonly', textvariable=self.textLightLevel)
-        self.entryAirHumidity = Entry(frame, state='readonly', textvariable=self.textAirHumidity)
-        self.entrySoilMoisture = Entry(frame, state='readonly', textvariable=self.textSoilMoisture)
+        self.entryTemperature = ttk.Entry(frame, state='readonly', textvariable=self.textTemperature)
+        self.entryLightLevel =ttk.Entry(frame, state='readonly', textvariable=self.textLightLevel)
+        self.entryAirHumidity = ttk.Entry(frame, state='readonly', textvariable=self.textAirHumidity)
+        self.entrySoilMoisture = ttk.Entry(frame, state='readonly', textvariable=self.textSoilMoisture)
 
         #Sterowanie
-
         self.labelEmpty2 = Label(frame, text='')
         self.label4 = Label(frame, text='Sterowanie:')
         self.radioManual = Radiobutton(frame, text='Manualne', value=2, state=DISABLED, command=self.manualMode)
-        self.radioAutomatic = Radiobutton(frame, text='Automatyczne', value=1, state=DISABLED, command=self.automaticMode)
-        self.button_bulb = Button(frame, text='Włącz żarówkę', width=19, state=DISABLED, command=self.bulbOnOff)
-        self.button_fan = Button(frame, text='Włącz wiatrak', width=19, state=DISABLED, command=self.fanOnOff)
-        self.button_pump = Button(frame, text='Podlej', width=19, state=DISABLED, command=self.water)
-        self.button_servo = Button(frame, text='Zwilż', width=19, state=DISABLED, command=self.spray)
+        self.radioAutomatic = Radiobutton(frame, text='Automatyczne', value=1, state=DISABLED,
+                                              command=self.automaticMode)
+        self.radioAutomatic.select()
+        self.button_bulb = ttk.Button(frame, text='Włącz żarówkę', width=22, state=DISABLED, command=self.bulbOnOff)
+        self.button_fan = ttk.Button(frame, text='Włącz wiatrak', width=22, state=DISABLED, command=self.fanOnOff)
+        self.button_pump = ttk.Button(frame, text='Podlej', width=22, state=DISABLED, command=self.water)
+        self.button_servo = ttk.Button(frame, text='Zwilż', width=22, state=DISABLED, command=self.spray)
         self.labelEmpty3 = Label(frame, text='')
 
         # Analiza danych
         self.textTime = StringVar()
         self.textDataCount = StringVar()
 
-        self.label5 = Label(frame, text='Analiza danych: (trwaja prace nad tym modulem)')
+        self.label5 = Label(frame, text='Analiza danych:')
         self.label6 = Label(frame, text='Zapisywanie danych od:')
-        self.entryTime = Entry(frame, state='readonly', textvariable=self.textTime)
+        self.entryTime = ttk.Entry(frame, state='readonly', textvariable=self.textTime)
         self.Label7 = Label(frame, text='Liczba wpisów:')
-        self.entryDataCount = Entry(frame, state='readonly', textvariable=self.textDataCount)
+        self.entryDataCount = ttk.Entry(frame, state='readonly', textvariable=self.textDataCount)
         self.Label8 = Label(frame, text='Wygeneruj:')
-        self.button_1hourplot = Button(frame, text='Wykres z ostatniej godziny', width=19, state=DISABLED, command=self.plot1hour)
-        self.button_plot = Button(frame, text='Wykres z calego zakresu', width=19, state=DISABLED, command=lambda: analizaDanych.plotSubplot(2))
-        self.button_excel = Button(frame, text='Plik Excel', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('xlsx'))
-        self.button_csv = Button(frame, text='plik csv', width=19, state=DISABLED, command=lambda: analizaDanych.dataframe('csv'))
+        self.button_1hourplot = ttk.Button(frame, text='Wykres ostatniej godziny', width=22, state=DISABLED,
+                                           command=self.plot1hour)
+        self.button_plot = ttk.Button(frame, text='Wykres z calego zakresu', width=22, state=DISABLED,
+                                      command=lambda: analizaDanych.plotSubplot(2))
+        self.button_excel = ttk.Button(frame, text='Plik Excel', width=22, state=DISABLED,
+                                       command=lambda: analizaDanych.dataframe('xlsx'))
+        self.button_csv = ttk.Button(frame, text='Plik csv', width=22, state=DISABLED,
+                                     command=lambda: analizaDanych.dataframe('csv'))
         self.labelEmpty4 = Label(frame, text='')
 
         #Wyjscie, informacje
-        self.button_info = Button(frame, text='Info', width=40, command= self.info)
-        self.button_quit = Button(frame, text='Wyjście', width=40, state=DISABLED)
+        self.button_info = ttk.Button(frame, text='Info', width=45, command=self.info)
+        self.button_quit = ttk.Button(frame, text='Wyjście', width=45, command=self.onExit)
+        #self.protocol("WM_DELETE_WINDOW", self.onExit)
 
         # Ustawienie wszystkiego w siatce interfejsu
         self.label1.grid(row=0, columnspan=2, sticky=W)
@@ -116,7 +122,7 @@ class Gui:
         self.button_quit.grid(row=15, column=2, columnspan=2)
 
     def connect(self):
-        """funnkcja sluzaca do polaczenia sie aplikacji z arduino"""
+        """funnkcja sluzaca do wywolania funkcji laczacej sie z arduino oraz odblokowania przyciskow po polaczeniu."""
         comNumber = str(self.entryNrCOM.get())
         try:
             arduino.connect(comNumber)
@@ -129,12 +135,14 @@ class Gui:
             self.button_plot.config(state=NORMAL)
             self.button_excel.config(state=NORMAL)
             self.button_csv.config(state=NORMAL)
+            self.automaticMode()
+
 
         except serial.serialutil.SerialException:
             messagebox.showerror("Error", "Nieprawidłowy numer COM")
 
     def arduinoWrite(self):
-        """Wysyłąnie zmiennych do arduino"""
+        """Wysyłąnie zmiennych sterujacych do arduino"""
         controlWrite = self.controlVariable[0] + ';' + self.controlVariable[1] + ';' + self.controlVariable[2] + ';' + \
                        self.controlVariable[3] + ';' + self.controlVariable[4]
         arduino.arduinoSerialData.write(controlWrite.encode())
@@ -181,6 +189,7 @@ class Gui:
             self.controlVariable[2] = '0'
             self.arduinoWrite()
             self.button_bulb['text'] = 'Włącz żarówkę'
+
     def spray(self):
         """Uruchomienie serwonapedu przyciskiem"""
         self.controlVariable[4] = '1'
@@ -198,19 +207,20 @@ class Gui:
         self.arduinoWrite()
 
     def plot1hour(self):
-            if len(arduino.airHumidityArray) < 62:
-                messagebox.showwarning("Error", "Niewystarczająca ilość zebranych danych")
-            else:
-                analizaDanych.plotSubplot(-60)
+        """Wygenerowanie wykresu z ostatniej godziny"""
+        if len(arduino.airHumidityArray) < 62:
+            messagebox.showwarning("Error", "Niewystarczająca ilość zebranych danych")
+        else:
+            analizaDanych.plotSubplot(-60)
+
     def info(self):
-        messagebox.showinfo("Informacje", "Część pracy inżynierskiej pt. 'System automatyzacji uprawy drzewka bonsai'. Aplikacja służy do zarządzania oraz sterowania systemem a także do zbierania danych. Wykonał Damian Grzywna.")
+        """Funkcja pokazujaca informacjie o aplikacji"""
+        messagebox.showinfo("Informacje", "Część pracy inżynierskiej pt. 'System automatyzacji uprawy drzewka bonsai'" +
+        ". Aplikacja służy do zarządzania oraz sterowania systemem a także do zbierania danych." +
+        "Wykonał Damian Grzywna.")
 
-
-
-
-# root = Tk()
-# b = Gui(root)
-# root.mainloop()
-
-
-
+    def onExit(self):
+        """Potwierdzenie wyjscia oraz zamkniecie calej aplkacji"""
+        if messagebox.askyesno("Wyjście", "Czy na pewno chcesz wyjść?"):
+            arduino.connected = 2
+            sys.exit()

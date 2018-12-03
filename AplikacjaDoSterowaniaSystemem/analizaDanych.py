@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
-import arduino
 import pandas as pd
+
+import arduino
 
 
 def plotSubplot(a):
+    """Funkcja generujaca wykresy z zebranych danych"""
 
     plt.subplot(2, 2, 1)
     plt.plot( arduino.temperatureArray[a:], 'r.-')
@@ -11,7 +13,7 @@ def plotSubplot(a):
     plt.ylabel('°C')
 
     plt.subplot(2, 2, 2)
-    plt.plot( arduino.lightLevelArray[a:], 'y.-')
+    plt.plot(arduino.lightLevelArray[a:], 'y.-')
     plt.title('Nasłonecznienie')
     plt.ylabel('%')
 
@@ -29,23 +31,27 @@ def plotSubplot(a):
     plt.show()
 
 def dataframe(type):
-    frame={'Czas': arduino.timeArray[2:],
-           'Temperatura': arduino.temperatureArray[2:],
-           'Naslonecznienie': arduino.lightLevelArray[2:],
-           'Wilgotnosc powietrza': arduino.airHumidityArray[2:],
-           'Wilgotnosc gleby': arduino.soilMoistureArray[2:],
-           'Wiatrak': arduino.fanConditionArray[2:],
-           'Zarowka': arduino.bulbConditionArray[2:],
-           'Serwonapęd': arduino.servoConditionArray[2:],
-           'Pompa': arduino.pumpConditionArray[2:],
-           'Tryb': arduino.modeConditionArray[2:]
-           }
+    """Funkcja do generowania plikow xlsx lub csv z zebranych danych"""
+
+    frame = {'Czas': arduino.timeArray[2:],
+            'Temperatura': arduino.temperatureArray[2:],
+            'Naslonecznienie': arduino.lightLevelArray[2:],
+            'Wilgotnosc powietrza': arduino.airHumidityArray[2:],
+            'Wilgotnosc gleby': arduino.soilMoistureArray[2:],
+            'Wiatrak': arduino.fanConditionArray[2:],
+            'Zarowka': arduino.bulbConditionArray[2:],
+            'Serwonaped': arduino.servoConditionArray[2:],
+            'Pompa': arduino.pumpConditionArray[2:],
+            'Tryb': arduino.modeConditionArray[2:]}
+
     df = pd.DataFrame.from_dict(frame)
+    try:
+        if type == 'xlsx': #tworzenie pliku Excel
+            writer = pd.ExcelWriter('bonsai'+arduino.timeArray[2][:10]+'.'+str(type))
+            df.to_excel(writer, 'Sheet1')
+            writer.save()
 
-    if type == 'xlsx':
-        writer = pd.ExcelWriter('bonsai'+arduino.timeArray[2][:10]+'.'+str(type))
-        df.to_excel(writer, 'Sheet1')
-        writer.save()
-
-    if type == 'csv':
-        df.to_csv('bonsai.'+str(type))
+        if type == 'csv': #tworzenie pliku csv
+            df.to_csv('bonsai.'+arduino.timeArray[2][:10]+str(type))
+    except IndexError:
+        pass

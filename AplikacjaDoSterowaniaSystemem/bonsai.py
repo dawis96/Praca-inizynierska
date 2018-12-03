@@ -1,14 +1,16 @@
 from tkinter import *
 import threading
+import time
+
 import arduino
 import gui
-import time
 
 arduino.connected = 0
 
 
 def interfejs():
-    global b
+    """Funkcja tworzaca obiekt klasy Gui"""
+    global b, root
     root = Tk()
 
     b = gui.Gui(root)
@@ -16,7 +18,9 @@ def interfejs():
     root.iconbitmap(r'bonsai.ico') #Designed by Freepik from www.flaticon.com
     root.mainloop()
 
+
 def data():
+    """funkcja wywoluje jesli to mozliwe funkcje getData z pliku arduino oraz wysyla dane z czujnikow do interfejsu"""
     global b
     while True:
         try:
@@ -33,8 +37,10 @@ def data():
                 b.textDataCount.set(len(dane[4])-2)
             time.sleep(5)
         except (NameError, TypeError):
-            print('brak polaczenia/dane nie sa gotowe')
-            time.sleep(5)
+            #print('brak polaczenia/dane nie sa gotowe')
+            time.sleep(2)
+        if arduino.connected == 2:
+            break
 
 
 t1 = threading.Thread(target=interfejs)
