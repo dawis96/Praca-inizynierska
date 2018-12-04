@@ -15,7 +15,10 @@ def interfejs():
 
     b = gui.Gui(root)
     root.title('bonsai.py')
-    root.iconbitmap(r'bonsai.ico') #Designed by Freepik from www.flaticon.com
+    try:
+        root.iconbitmap(r'bonsai.ico') #Designed by Freepik from www.flaticon.com
+    except TclError:
+        pass
     root.mainloop()
 
 

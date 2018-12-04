@@ -52,6 +52,6 @@ def dataframe(type):
             writer.save()
 
         if type == 'csv': #tworzenie pliku csv
-            df.to_csv('bonsai.'+arduino.timeArray[2][:10]+str(type))
+            df.to_csv('bonsai'+arduino.timeArray[2][:10]+'.'+str(type))
     except IndexError:
         pass

@@ -222,5 +222,6 @@ class Gui:
     def onExit(self):
         """Potwierdzenie wyjscia oraz zamkniecie calej aplkacji"""
         if messagebox.askyesno("Wyjście", "Czy na pewno chcesz wyjść?"):
+            self.automaticMode()
             arduino.connected = 2
             sys.exit()
