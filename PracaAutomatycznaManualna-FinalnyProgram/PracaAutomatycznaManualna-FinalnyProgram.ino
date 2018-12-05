@@ -71,7 +71,7 @@ void setup() {
   pinMode(relay_bulb, OUTPUT) ; 
   digitalWrite(relay_bulb, HIGH);
   pinMode(relay_pump, OUTPUT) ; 
-  digitalWrite(relay_pump, LOW); //narazie LOW, po podlaczeniu przekaznika zmienić na HIGH
+  digitalWrite(relay_pump, HIGH); //narazie LOW, po podlaczeniu przekaznika zmienić na HIGH
   dht.setup(DHT11_PIN);
   servomotor.attach(9);
   servomotor.write(0);
@@ -176,7 +176,7 @@ void loop() {
       writePump = 1;
     }
     else{
-      digitalWrite(relay_pump, LOW);
+      digitalWrite(relay_pump, HIGH);
     }
   }
   else {
@@ -209,7 +209,7 @@ void loop() {
      writePump = 1;
     }
     else{
-      digitalWrite(relay_pump, LOW);
+      digitalWrite(relay_pump, HIGH);
     } 
   }
 }
@@ -305,10 +305,10 @@ float average_soil_moisture(){
 void pumpON(unsigned long startTime, unsigned long endTime){
  actualTimePump=millis();
  if (actualTimePump - keptTimePump >= startTime){
-      digitalWrite(relay_pump, HIGH);
+      digitalWrite(relay_pump, LOW);
     }
     if (actualTimePump - keptTimePump >= endTime){
-      digitalWrite(relay_pump, LOW);
+      digitalWrite(relay_pump, HIGH);
       keptTimePump=actualTimePump;
     }
 }

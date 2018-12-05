@@ -34,10 +34,10 @@ def dataframe(type):
     """Funkcja do generowania plikow xlsx lub csv z zebranych danych"""
 
     frame = {'Czas': arduino.timeArray[2:],
-            'Temperatura': arduino.temperatureArray[2:],
-            'Naslonecznienie': arduino.lightLevelArray[2:],
-            'Wilgotnosc powietrza': arduino.airHumidityArray[2:],
-            'Wilgotnosc gleby': arduino.soilMoistureArray[2:],
+            'Temperatura (°C)': arduino.temperatureArray[2:],
+            'Naslonecznienie (%)': arduino.lightLevelArray[2:],
+            'Wilgotnosc powietrza (%)': arduino.airHumidityArray[2:],
+            'Wilgotnosc gleby (%)': arduino.soilMoistureArray[2:],
             'Wiatrak': arduino.fanConditionArray[2:],
             'Zarowka': arduino.bulbConditionArray[2:],
             'Serwonaped': arduino.servoConditionArray[2:],

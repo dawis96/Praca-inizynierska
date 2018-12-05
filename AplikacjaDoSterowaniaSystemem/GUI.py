@@ -170,23 +170,23 @@ class Gui:
 
     def fanOnOff(self):
         """Sterowanie wiatrakiem z przycisku"""
-        if self.controlVariable[1] == '0':
-            self.controlVariable[1]='1'
+        if self.controlVariable[2] == '0':
+            self.controlVariable[2]='1'
             self.arduinoWrite()
             self.button_fan['text']='Wyłącz wiatrak'
-        elif self.controlVariable[1] == '1':
-            self.controlVariable[1]='0'
+        elif self.controlVariable[2] == '1':
+            self.controlVariable[2]='0'
             self.arduinoWrite()
             self.button_fan['text']='Włącz wiatrak'
 
     def bulbOnOff(self):
         """Sterowanie zarowka z przycisku"""
-        if self.controlVariable[2] == '0':
-            self.controlVariable[2] = '1'
+        if self.controlVariable[1] == '0':
+            self.controlVariable[1] = '1'
             self.arduinoWrite()
             self.button_bulb['text'] = 'Wyłącz żarówkę'
-        elif self.controlVariable[2] == '1':
-            self.controlVariable[2] = '0'
+        elif self.controlVariable[1] == '1':
+            self.controlVariable[1] = '0'
             self.arduinoWrite()
             self.button_bulb['text'] = 'Włącz żarówkę'
 
@@ -222,6 +222,9 @@ class Gui:
     def onExit(self):
         """Potwierdzenie wyjscia oraz zamkniecie calej aplkacji"""
         if messagebox.askyesno("Wyjście", "Czy na pewno chcesz wyjść?"):
-            self.automaticMode()
+            try:
+                self.automaticMode()
+            except serial.serialutil.SerialException:
+                pass
             arduino.connected = 2
             sys.exit()
